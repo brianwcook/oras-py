@@ -250,6 +250,7 @@ class Registry:
                 blob, container, layer, refresh_headers=refresh_headers
             )
         else:
+            print("chunked upload ON.")
             response = self.chunked_upload(
                 blob, container, layer, refresh_headers=refresh_headers
             )
@@ -585,7 +586,10 @@ class Registry:
         # Read the blob in chunks, for each do a patch
         start = 0
         with open(blob, "rb") as fd:
-            for chunk in oras.utils.read_in_chunks(fd):
+            for chunk in oras.utils.read_in_chunks(fd, chunk_size=16777216):
+                
+                print("uploading chunk starting at " + str(start))
+
                 if not chunk:
                     break
 
