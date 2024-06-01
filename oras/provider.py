@@ -219,13 +219,13 @@ class Registry:
         container: container_type,
         layer: dict,
         do_chunked: bool = False,
-        chunk_size = None,
+        chunk_size=None,
         refresh_headers: bool = True,
     ) -> requests.Response:
         """
         Prepare and upload a blob.
 
-        Large artifacts can be uploaded via a chunked approach (post, patch+, put) 
+        Large artifacts can be uploaded via a chunked approach (post, patch+, put)
         to registries that support it. Larger chunks generally give better throughput.
         Set do_chunked=True for chunked upload.
 
@@ -255,7 +255,11 @@ class Registry:
         else:
             print("chunked upload ON.")
             response = self.chunked_upload(
-                blob, container, layer, refresh_headers=refresh_headers
+                blob,
+                container,
+                layer,
+                refresh_headers=refresh_headers,
+                chunk_size=chunk_size,
             )
 
         # If we have an empty layer digest and the registry didn't accept, just return dummy successful response
@@ -573,11 +577,13 @@ class Registry:
         :type layer: dict
         :param refresh_headers: if true, headers are refreshed
         :type refresh_headers: bool
+        :param chunk_size: chunk size in bytes
+        :type chunk_size: int
         """
-        
-        default_chunk_size=16777216
+
+        default_chunk_size = 16777216
         if chunk_size is None:
-            chunk_size=default_chunk_size
+            chunk_size = default_chunk_size
 
         # Start an upload session
         headers = {"Content-Type": "application/octet-stream", "Content-Length": "0"}
@@ -596,7 +602,6 @@ class Registry:
         start = 0
         with open(blob, "rb") as fd:
             for chunk in oras.utils.read_in_chunks(fd, chunk_size=chunk_size):
-                
                 print("uploading chunk starting at " + str(start))
 
                 if not chunk:
@@ -729,7 +734,7 @@ class Registry:
         do_chunked = kwargs.get("do_chunked")
         if do_chunked is None:
             do_chunked = False
-        
+
         chunk_size = kwargs.get("chunk_size")
 
         # Upload files as blobs
@@ -778,8 +783,12 @@ class Registry:
 
             # Upload the blob layer
             response = self.upload_blob(
-                blob, container, layer, refresh_headers=refresh_headers, 
-                do_chunked=do_chunked, chunk_size=chunk_size
+                blob,
+                container,
+                layer,
+                refresh_headers=refresh_headers,
+                do_chunked=do_chunked,
+                chunk_size=chunk_size,
             )
             self._check_200_response(response)
 
