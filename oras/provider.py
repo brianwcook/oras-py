@@ -602,8 +602,7 @@ class Registry:
         start = 0
         with open(blob, "rb") as fd:
             for chunk in oras.utils.read_in_chunks(fd, chunk_size=chunk_size):
-                print("uploading chunk starting at " + str(start))
-
+                
                 if not chunk:
                     break
 
@@ -615,6 +614,9 @@ class Registry:
                     "Content-Type": "application/octet-stream",
                 }
 
+                print("uploading chunk starting at " + str(start))
+
+                print(headers)
                 # Important to update with auth token if acquired
                 headers.update(self.headers)
                 start = end + 1
